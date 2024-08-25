@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,8 +6,29 @@ using UnityEngine;
 public class WarpManager : Singleton<WarpManager>
 {
     [SerializeField] private Camera _camera;
+
+    private List<Transform> _trasnforms = new();
     
-    public void KeepInBounds(Transform keptTransform)
+    public void SubscribeTransform(Transform addedTransform)
+    {
+        _trasnforms.Add(addedTransform);
+    }
+    
+    public void UnsubscribeTransform(Transform removedTransform)
+    {
+        _trasnforms.Remove(removedTransform);
+    }
+
+    private void Update()
+    {
+        foreach (var keptTransform in _trasnforms)
+        {
+            if (keptTransform != null)
+                KeepInBounds(keptTransform);
+        }   
+    }
+
+    private void KeepInBounds(Transform keptTransform)
     {
         var screenPoint = _camera.WorldToViewportPoint(keptTransform.position);
         var outOfBounds = false;

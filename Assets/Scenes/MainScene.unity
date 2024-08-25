@@ -154,7 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _spaceshipRigidbody: {fileID: 2135209094}
   _thrustForce: 300
-  _rotationDegrees: 4000
+  _rotationDegrees: 180
   _bulletPrefab: {fileID: 4678316897352260879, guid: 921ed4ce304df4c19bd27edea655be59, type: 3}
   _shootingForce: 30
   _audioSource: {fileID: 121801237}

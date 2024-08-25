@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -18,9 +19,13 @@ public class PlayerController : Singleton<PlayerController>
     
     private float _rotationDelta;
 
+    private void Awake()
+    {
+        WarpManager.Instance.SubscribeTransform(_spaceshipRigidbody.transform);
+    }
+
     private void Update()
     {
-        WarpManager.Instance.KeepInBounds(_spaceshipRigidbody.transform);
         HandleThrust();
         HandleRotation();
         HandleBullets();
@@ -30,13 +35,19 @@ public class PlayerController : Singleton<PlayerController>
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            var bullet = Instantiate(_bulletPrefab);
-            var bulletRigidbody = bullet.GetComponent<Rigidbody2D>();
-            bulletRigidbody.transform.position = _spaceshipRigidbody.transform.position; 
-            bulletRigidbody.AddForce(_spaceshipRigidbody.transform.up * _shootingForce, ForceMode2D.Impulse);
-            
+            SpawnBullet();
+
             _audioSource.PlayOneShot(_lasterClip);
         }
+    }
+
+    private void SpawnBullet()
+    {
+        var bullet = Instantiate(_bulletPrefab);
+        var bulletRigidbody = bullet.GetComponent<Rigidbody2D>();
+        bulletRigidbody.transform.position = _spaceshipRigidbody.transform.position; 
+        bulletRigidbody.AddForce(_spaceshipRigidbody.transform.up * _shootingForce, ForceMode2D.Impulse);
+        WarpManager.Instance.SubscribeTransform(bulletRigidbody.transform);
     }
 
     private void HandleThrust()
@@ -48,25 +59,22 @@ public class PlayerController : Singleton<PlayerController>
             _spaceshipRigidbody.AddForce(forceVector, ForceMode2D.Force);
         }
     }
-    
+
     private void HandleRotation()
     {
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            _rotationDelta = -1 * _rotationDegrees * Time.deltaTime;
+            _spaceshipRigidbody.transform.Rotate(Vector3.forward, -1 * _rotationDegrees * Time.deltaTime);
         }
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
-            _rotationDelta = _rotationDegrees * Time.deltaTime;
-        }
-        else
-        {
-            _rotationDelta = 0;
+            _spaceshipRigidbody.transform.Rotate(Vector3.forward, _rotationDegrees * Time.deltaTime);
         }
     }
 
-    private void FixedUpdate()
+    protected override void OnDestroy()
     {
-        _spaceshipRigidbody.MoveRotation(_spaceshipRigidbody.rotation + _rotationDelta);
+        base.OnDestroy();
+        WarpManager.Instance.UnsubscribeTransform(_spaceshipRigidbody.transform);
     }
 }
