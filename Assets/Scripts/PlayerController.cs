@@ -70,7 +70,7 @@ public class PlayerController : Singleton<PlayerController>
 
     private void HandleBullets()
     {
-        if (!Input.GetKeyDown(KeyCode.Space)) 
+        if (!InputController.Instance.PressingFire) 
             return;
         
         if (_isOnShootingTimeout)
@@ -101,7 +101,7 @@ public class PlayerController : Singleton<PlayerController>
 
     private void HandleThrust()
     {
-        _isFlying = Input.GetKey(KeyCode.UpArrow);
+        _isFlying = InputController.Instance.PressingThrust;
         if (IsFlying)
         {
             var spaceshipTransform = _spaceship.transform;
@@ -112,11 +112,11 @@ public class PlayerController : Singleton<PlayerController>
 
     private void HandleRotation()
     {
-        if (Input.GetKey(KeyCode.RightArrow))
+        if (InputController.Instance.RotatingRight)
         {
             _spaceship.transform.Rotate(Vector3.forward, -1 * _rotationDegrees * Time.deltaTime);
         }
-        else if (Input.GetKey(KeyCode.LeftArrow))
+        else if (InputController.Instance.RotatingLeft)
         {
             _spaceship.transform.Rotate(Vector3.forward, _rotationDegrees * Time.deltaTime);
         }

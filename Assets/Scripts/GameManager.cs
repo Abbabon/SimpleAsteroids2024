@@ -13,7 +13,7 @@ public class GameManager : Singleton<GameManager>
     private int _hiScore;
 
     [Header("Asteroids")]
-    [SerializeField] private List<GameObject> _asteroidSpawnLocations;
+    [SerializeField] private List<AsteroidSpawnLocation> _asteroidSpawnLocations;
     [SerializeField] private Asteroid _asteroidPrefab;
     private readonly List<Asteroid> _currentAsteroids = new();
 
@@ -47,7 +47,7 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
-    private void SpawnAsteroid(GameObject asteroidSpawnLocation)
+    private void SpawnAsteroid(AsteroidSpawnLocation asteroidSpawnLocation)
     {
         // TODO: pool asteroids?
         var newAsteroid = Instantiate(_asteroidPrefab);
@@ -104,7 +104,6 @@ public class GameManager : Singleton<GameManager>
         }
         else
         {
-            //TODO: wait for like 5 seconds? 
             PlayerController.Instance.OnPlayerHit();
             CanvasManager.Instance.UpdateLives(_currentLives);
         }
@@ -112,7 +111,7 @@ public class GameManager : Singleton<GameManager>
 
     private void HandleGameOver()
     {
-        //TODO: wait for like 5 seconds? 
+        // TODO: start game over screen sequence, then call this:
         StartGame();
     }
 }
