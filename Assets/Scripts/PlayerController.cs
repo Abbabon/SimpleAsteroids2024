@@ -12,6 +12,7 @@ public class PlayerController : Singleton<PlayerController>
     [SerializeField] private float _rotationDegrees = 10;
     [SerializeField] private Vector3 _initialPosition;
     [SerializeField] private float _fireCooldown = 0.2f;
+    [SerializeField] private float _hitCooldown = 2f;
     
     [Header("Bullets")]
     [SerializeField] private Bullet _bulletPrefab;
@@ -24,8 +25,9 @@ public class PlayerController : Singleton<PlayerController>
     
     private Spaceship _spaceship;
     private bool _isFlying;
+    private bool _isOnCooldown;
     private bool _isOnShootingTimeout;
-    public bool isFlying => _isFlying;
+    public bool IsFlying => _isFlying;
 
     private BestObjectPool<Bullet> _bulletPool;
 
@@ -36,19 +38,31 @@ public class PlayerController : Singleton<PlayerController>
         WarpManager.Instance.SubscribeTransform(_spaceship.transform);
     }
     
-    public void InitializePlayer()
+    public void InitializePlayerLocation()
     {
         _spaceship.transform.position = _initialPosition;
     }
     
     public void OnPlayerHit()
     {
-        // TODO: animate and limit invincibility and input
-        InitializePlayer();
+        InitializePlayerLocation();
+        StartCoroutine(HitCooldown());
+    }
+
+    private IEnumerator HitCooldown()
+    {
+        _isOnCooldown = true;
+        _spaceship.TurnCooldownMode(true);
+        yield return new WaitForSeconds(_hitCooldown);
+        _isOnCooldown = false;
+        _spaceship.TurnCooldownMode(false);
     }
 
     private void Update()
     {
+        if (_isOnCooldown)
+            return;
+        
         HandleThrust();
         HandleRotation();
         HandleBullets();
@@ -56,14 +70,15 @@ public class PlayerController : Singleton<PlayerController>
 
     private void HandleBullets()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (_isOnShootingTimeout)
-                return;
-            SpawnBullet();
-            StartCoroutine(ShootTimeout());
-            _audioSource.PlayOneShot(_lasterClip);
-        }
+        if (!Input.GetKeyDown(KeyCode.Space)) 
+            return;
+        
+        if (_isOnShootingTimeout)
+            return;
+            
+        SpawnBullet();
+        StartCoroutine(ShootTimeout());
+        _audioSource.PlayOneShot(_lasterClip);
     }
     
     private IEnumerator ShootTimeout()
@@ -81,20 +96,13 @@ public class PlayerController : Singleton<PlayerController>
         bulletRigidbody.transform.position = _spaceship.transform.position; 
         bulletRigidbody.AddForce(_spaceship.transform.up * _shootingForce, ForceMode2D.Impulse);
         WarpManager.Instance.SubscribeTransform(bulletRigidbody.transform);
-        
-        StartCoroutine(BulletTimeout(bullet));
-    }
-
-    private IEnumerator BulletTimeout(Bullet bullet)
-    {
-        yield return new WaitForSeconds(_bulletTimeout);
-        GameManager.Instance.DestroyBullet(bullet);
+        bullet.StartTimeoutCoroutine(_bulletTimeout);
     }
 
     private void HandleThrust()
     {
         _isFlying = Input.GetKey(KeyCode.UpArrow);
-        if (isFlying)
+        if (IsFlying)
         {
             var spaceshipTransform = _spaceship.transform;
             var forceVector = spaceshipTransform.up * (_thrustForce * Time.deltaTime);

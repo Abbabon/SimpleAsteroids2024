@@ -15,7 +15,7 @@ public class GameManager : Singleton<GameManager>
     [Header("Asteroids")]
     [SerializeField] private List<GameObject> _asteroidSpawnLocations;
     [SerializeField] private Asteroid _asteroidPrefab;
-    private List<Asteroid> _currentAsteroids = new();
+    private readonly List<Asteroid> _currentAsteroids = new();
 
     private void Start()
     {
@@ -28,7 +28,7 @@ public class GameManager : Singleton<GameManager>
         _currentLives = _initialLives;
         _currentScore = 0;
         
-        PlayerController.Instance.InitializePlayer();
+        PlayerController.Instance.InitializePlayerLocation();
         
         CanvasManager.Instance.UpdateLives(_currentLives);
         CanvasManager.Instance.UpdateCurrentScore(_currentScore);
@@ -76,15 +76,11 @@ public class GameManager : Singleton<GameManager>
         CanvasManager.Instance.UpdateCurrentScore(_currentScore);
     }
 
-    public void DestroyBullet(Bullet bullet)
+    private void DestroyBullet(Bullet bullet)
     {
-        if (!bullet.AlreadyDestroyed)
-        {
-            bullet.AlreadyDestroyed = true;
-            PlayerController.Instance.ReturnBullet(bullet);
-            WarpManager.Instance.UnsubscribeTransform(bullet.transform);
-        }
-        
+        bullet.StopTimeoutCoroutine();
+        PlayerController.Instance.ReturnBullet(bullet);
+        WarpManager.Instance.UnsubscribeTransform(bullet.transform);
     }
 
     private void DestroyAsteroid(Asteroid asteroid, bool removeFromList = true)

@@ -182,6 +182,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animator: {fileID: 4404577155907084746}
   _rigidbody: {fileID: 8599408432975937254}
+  _collider: {fileID: 5877022013987723040}
 --- !u!60 &5877022013987723040
 PolygonCollider2D:
   m_ObjectHideFlags: 0
