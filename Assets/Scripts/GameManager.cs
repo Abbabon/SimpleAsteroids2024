@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
 {
+    private const string HiScore = "HiScore";
+    
     [Header("GameLoop")]
     [SerializeField] private int _initialLives = 3;
     private int _currentLives;
     private int _currentScore;
+    private int _hiScore;
 
     [Header("Asteroids")]
     [SerializeField] private List<GameObject> _asteroidSpawnLocations;
@@ -21,7 +24,7 @@ public class GameManager : Singleton<GameManager>
 
     private void StartGame()
     {
-        var hiScore = 0; // TODO??
+        _hiScore = PlayerPrefs.GetInt(HiScore, 0);
         _currentLives = _initialLives;
         _currentScore = 0;
         
@@ -29,7 +32,7 @@ public class GameManager : Singleton<GameManager>
         
         CanvasManager.Instance.UpdateLives(_currentLives);
         CanvasManager.Instance.UpdateCurrentScore(_currentScore);
-        CanvasManager.Instance.UpdateHiScore(hiScore);
+        CanvasManager.Instance.UpdateHiScore(_hiScore);
 
         // TODO: pool asteroids?
         foreach (var currentAsteroid in _currentAsteroids)
@@ -60,14 +63,28 @@ public class GameManager : Singleton<GameManager>
         DestroyAsteroid(asteroid);
 
         _currentScore += asteroid.Score;
+        
+        if (_currentScore > _hiScore)
+        {
+            _hiScore = _currentScore;
+            PlayerPrefs.SetInt(HiScore, _hiScore);
+            PlayerPrefs.Save();
+            
+            CanvasManager.Instance.UpdateHiScore(_hiScore);
+        }
+        
         CanvasManager.Instance.UpdateCurrentScore(_currentScore);
     }
 
-    private static void DestroyBullet(Bullet bullet)
+    public void DestroyBullet(Bullet bullet)
     {
-        // TODO: pool bullets?
-        Destroy(bullet.gameObject);
-        WarpManager.Instance.UnsubscribeTransform(bullet.transform);
+        if (!bullet.AlreadyDestroyed)
+        {
+            bullet.AlreadyDestroyed = true;
+            PlayerController.Instance.ReturnBullet(bullet);
+            WarpManager.Instance.UnsubscribeTransform(bullet.transform);
+        }
+        
     }
 
     private void DestroyAsteroid(Asteroid asteroid, bool removeFromList = true)

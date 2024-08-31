@@ -156,8 +156,9 @@ MonoBehaviour:
   _thrustForce: 300
   _rotationDegrees: 180
   _initialPosition: {x: 0, y: 0, z: 0}
-  _bulletPrefab: {fileID: 4678316897352260879, guid: 921ed4ce304df4c19bd27edea655be59, type: 3}
+  _bulletPrefab: {fileID: 5898771267087963575, guid: 921ed4ce304df4c19bd27edea655be59, type: 3}
   _shootingForce: 30
+  _bulletTimeout: 0.35
   _audioSource: {fileID: 121801237}
   _lasterClip: {fileID: 8300000, guid: bad1e4a69139d4d51a91d7cc09f86d45, type: 3}
 --- !u!4 &121801236
@@ -405,7 +406,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 2.49
+  m_Spacing: 4.48
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -1164,7 +1165,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 13.599976, y: -13.600006}
+  m_AnchoredPosition: {x: 13.599976, y: -13.599976}
   m_SizeDelta: {x: 142.3607, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &1377245763
