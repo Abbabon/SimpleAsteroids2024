@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -8,7 +9,19 @@ public class CanvasManager : Singleton<CanvasManager>
     [SerializeField] private TextMeshProUGUI _currentScoreText;
     [SerializeField] private TextMeshProUGUI _hiScoreText;
     [SerializeField] private List<Image> _livesImages;
+
+    [SerializeField] private GameObject _canvasButtonsContainer;
     
+    
+    private void Awake()
+    {
+        var shouldPresentCanvasButtons = false;
+        #if UNITY_ANDROID || UNITY_IOS
+        shouldPresentCanvasButtons = true;
+        #endif
+        _canvasButtonsContainer.SetActive(shouldPresentCanvasButtons);
+    }
+
     public void UpdateHiScore(int hiScore)
     {
         _hiScoreText.text = hiScore.ToString();

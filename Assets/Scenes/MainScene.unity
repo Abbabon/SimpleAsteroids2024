@@ -1051,6 +1051,7 @@ MonoBehaviour:
   - {fileID: 196875960}
   - {fileID: 535425892}
   - {fileID: 949675394}
+  _canvasButtonsContainer: {fileID: 128601063}
 --- !u!114 &996718844
 MonoBehaviour:
   m_ObjectHideFlags: 0
