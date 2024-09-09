@@ -162,5 +162,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _rigidbody: {fileID: 6191846839713875685}
-  _initialThrustForce: 2
-  _score: 100
+  _spriteRenderer: {fileID: 6979080154534143424}

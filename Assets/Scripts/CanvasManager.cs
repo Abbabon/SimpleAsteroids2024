@@ -15,11 +15,11 @@ public class CanvasManager : Singleton<CanvasManager>
     
     private void Awake()
     {
-        var shouldPresentCanvasButtons = false;
-        #if UNITY_ANDROID || UNITY_IOS
-        shouldPresentCanvasButtons = true;
-        #endif
-        _canvasButtonsContainer.SetActive(shouldPresentCanvasButtons);
+        // var shouldPresentCanvasButtons = false;
+        // #if UNITY_ANDROID || UNITY_IOS
+        // shouldPresentCanvasButtons = true;
+        // #endif
+        _canvasButtonsContainer.SetActive(true);
     }
 
     public void UpdateHiScore(int hiScore)

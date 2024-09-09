@@ -4,9 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AsteroidData", menuName = "AsteroidData")]
 public class AsteroidData : ScriptableObject
 {
-    public int Size;
+    public int Level;
     public int Score;
-    public float MinSpeed;
-    public float MaxSpeed;
+    public float InitialThrustForce;
     public List<Sprite> Sprites;
 }

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -16,6 +18,15 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private List<AsteroidSpawnLocation> _asteroidSpawnLocations;
     [SerializeField] private Asteroid _asteroidPrefab;
     private readonly List<Asteroid> _currentAsteroids = new();
+
+    [SerializeField] private List<AsteroidData> _asteroidDataList; 
+    private BestObjectPool<Asteroid> _asteroidPool;
+    private int _newAstroidsOnDestroy = 2;
+
+    private void Awake()
+    {
+        _asteroidPool = new BestObjectPool<Asteroid>(_asteroidPrefab);
+    }
 
     private void Start()
     {
@@ -33,35 +44,37 @@ public class GameManager : Singleton<GameManager>
         CanvasManager.Instance.UpdateLives(_currentLives);
         CanvasManager.Instance.UpdateCurrentScore(_currentScore);
         CanvasManager.Instance.UpdateHiScore(_hiScore);
-
-        // TODO: pool asteroids?
+        
         foreach (var currentAsteroid in _currentAsteroids)
         {
-            DestroyAsteroid(currentAsteroid, false);
+            DestroyAsteroid(currentAsteroid);
         }
         _currentAsteroids.Clear();
         
         foreach (var asteroidSpawnLocation in _asteroidSpawnLocations)
         {
-            SpawnAsteroid(asteroidSpawnLocation);
+            SpawnAsteroid(asteroidSpawnLocation.transform.position, 1);
         }
     }
 
-    private void SpawnAsteroid(AsteroidSpawnLocation asteroidSpawnLocation)
+    private void SpawnAsteroid(Vector3 asteroidSpawnPosition, int level)
     {
-        // TODO: pool asteroids?
-        var newAsteroid = Instantiate(_asteroidPrefab);
-        newAsteroid.transform.position = asteroidSpawnLocation.transform.position;
+        var newAsteroid = _asteroidPool.Get();
+        
+        var asteroidData = _asteroidDataList.FirstOrDefault(asteroidData => asteroidData.Level == level);
+        
+        newAsteroid.Setup(asteroidData);
+        newAsteroid.transform.position = asteroidSpawnPosition;
         WarpManager.Instance.SubscribeTransform(newAsteroid.transform);
-        newAsteroid.InvokeInitialForce();
         _currentAsteroids.Add(newAsteroid);
+        
+        newAsteroid.InvokeInitialForce();
     }
 
     public void OnBulletAsteroidCollision(Bullet bullet, Asteroid asteroid)
     {
         DestroyBullet(bullet);
-        DestroyAsteroid(asteroid);
-
+        
         _currentScore += asteroid.Score;
         
         if (_currentScore > _hiScore)
@@ -74,6 +87,15 @@ public class GameManager : Singleton<GameManager>
         }
         
         CanvasManager.Instance.UpdateCurrentScore(_currentScore);
+        if (asteroid.Level < _asteroidDataList.Count)
+        {
+            for (var i = 0; i < _newAstroidsOnDestroy; i++)
+            {
+                SpawnAsteroid(asteroid.transform.position, asteroid.Level + 1);    
+            }
+        }
+        
+        DestroyAsteroid(asteroid);
     }
 
     private void DestroyBullet(Bullet bullet)
@@ -83,13 +105,11 @@ public class GameManager : Singleton<GameManager>
         WarpManager.Instance.UnsubscribeTransform(bullet.transform);
     }
 
-    private void DestroyAsteroid(Asteroid asteroid, bool removeFromList = true)
+    private void DestroyAsteroid(Asteroid asteroid)
     {
-        // TODO: pool asteroids
-        Destroy(asteroid.gameObject);
+        _asteroidPool.Release(asteroid);
         WarpManager.Instance.UnsubscribeTransform(asteroid.transform);
-        if (removeFromList)
-            _currentAsteroids.Remove(asteroid);
+        _currentAsteroids.Remove(asteroid);
     }
 
     public void OnAsteroidSpaceshipCollision(Spaceship spaceship, Asteroid asteroid)
